@@ -46,7 +46,7 @@ public:
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Input")
 	// TObjectPtr<ULyraInputConfig> InputConfig;
 	//
-	// // Default camera mode used by player controlled pawns.
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Camera")
-	// TSubclassOf<ULyraCameraMode> DefaultCameraMode;
+	// Default camera mode used by player controlled pawns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Camera")
+	TSubclassOf<ULyraCameraMode> DefaultCameraMode;
 };

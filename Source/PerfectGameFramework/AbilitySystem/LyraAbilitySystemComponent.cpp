@@ -14,6 +14,10 @@ ULyraAbilitySystemComponent::ULyraAbilitySystemComponent()
 	// ...
 }
 
+void ULyraAbilitySystemComponent::ClearAbilityInput()
+{
+}
+
 
 // Called when the game starts
 void ULyraAbilitySystemComponent::BeginPlay()

@@ -9,7 +9,10 @@
 #include "LyraLogChannels.h"
 #include "LyraWorldSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "PerfectGameFramework/Character/LyraCharacter.h"
 #include "PerfectGameFramework/Character/LyraPawnData.h"
+#include "PerfectGameFramework/Character/LyraPawnExtensionComponent.h"
+#include "PerfectGameFramework/Player/LyraPlayerController.h"
 #include "PerfectGameFramework/Player/LyraPlayerSpawningManagerComponent.h"
 #include "PerfectGameFramework/Player/LyraPlayerState.h"
 #include "PerfectGameFramework/System/LyraAssetManager.h"
@@ -19,10 +22,10 @@ ALyraGameMode::ALyraGameMode(const FObjectInitializer& ObjectInitializer)
 {
 	GameStateClass = ALyraGameState::StaticClass();
 	// GameSessionClass = ALyraGameSession::StaticClass();
-	// PlayerControllerClass = ALyraPlayerController::StaticClass();
+	PlayerControllerClass = ALyraPlayerController::StaticClass();
 	// ReplaySpectatorPlayerControllerClass = ALyraReplayPlayerController::StaticClass();
 	PlayerStateClass = ALyraPlayerState::StaticClass();
-	// DefaultPawnClass = ALyraCharacter::StaticClass();
+	DefaultPawnClass = ALyraCharacter::StaticClass();
 	// HUDClass = ALyraHUD::StaticClass();
 }
 
@@ -93,17 +96,17 @@ APawn* ALyraGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* Ne
 	{
 		if (APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(PawnClass, SpawnTransform, SpawnInfo))
 		{
-			// if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(SpawnedPawn))
-			// {
-			// 	if (const ULyraPawnData* PawnData = GetPawnDataForController(NewPlayer))
-			// 	{
-			// 		PawnExtComp->SetPawnData(PawnData);
-			// 	}
-			// 	else
-			// 	{
-			// 		UE_LOG(LogLyra, Error, TEXT("Game mode was unable to set PawnData on the spawned pawn [%s]."), *GetNameSafe(SpawnedPawn));
-			// 	}
-			// }
+			if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(SpawnedPawn))
+			{
+				if (const ULyraPawnData* PawnData = GetPawnDataForController(NewPlayer))
+				{
+					PawnExtComp->SetPawnData(PawnData);
+				}
+				else
+				{
+					UE_LOG(LogLyra, Error, TEXT("Game mode was unable to set PawnData on the spawned pawn [%s]."), *GetNameSafe(SpawnedPawn));
+				}
+			}
 
 			SpawnedPawn->FinishSpawning(SpawnTransform);
 

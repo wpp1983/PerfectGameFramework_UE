@@ -4,27 +4,40 @@
 #include "LyraPlayerState.h"
 
 #include "LyraLogChannels.h"
+#include "LyraPlayerController.h"
+#include "Components/GameFrameworkComponentManager.h"
+#include "Components/PlayerStateComponent.h"
+#include "PerfectGameFramework/AbilitySystem/LyraAbilitySystemComponent.h"
 #include "PerfectGameFramework/GameModes/LyraExperienceManagerComponent.h"
 #include "PerfectGameFramework/GameModes/LyraGameMode.h"
 #include "PerfectGameFramework/Character/LyraPawnData.h"
+#include "PerfectGameFramework/Character/LyraPawnExtensionComponent.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(LyraPlayerState)
+
+const FName ALyraPlayerState::NAME_LyraAbilityReady("LyraAbilitiesReady");
 
 ALyraPlayerState::ALyraPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	
+	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<ULyraAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);	
 }
 
 void ALyraPlayerState::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
+
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 void ALyraPlayerState::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	// check(AbilitySystemComponent);
-	// AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
+	check(AbilitySystemComponent);
+	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
 
 	UWorld* World = GetWorld();
 	if (World && World->IsGameWorld() && World->GetNetMode() != NM_Client)
@@ -35,6 +48,52 @@ void ALyraPlayerState::PostInitializeComponents()
 		check(ExperienceComponent);
 		ExperienceComponent->CallOrRegister_OnExperienceLoaded(FOnLyraExperienceLoaded::FDelegate::CreateUObject(this, &ThisClass::OnExperienceLoaded));
 	}
+}
+
+void ALyraPlayerState::BeginPlay()
+{
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
+	
+	Super::BeginPlay();
+}
+
+void ALyraPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+	
+	Super::EndPlay(EndPlayReason);
+}
+
+void ALyraPlayerState::Reset()
+{
+	Super::Reset();
+	
+	TArray<UPlayerStateComponent*> ModularComponents;
+	GetComponents(ModularComponents);
+	for (UPlayerStateComponent* Component : ModularComponents)
+	{
+		Component->Reset();
+	}
+}
+
+void ALyraPlayerState::ClientInitialize(AController* C)
+{
+	Super::ClientInitialize(C);
+	
+	if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(GetPawn()))
+	{
+		PawnExtComp->CheckDefaultInitialization();
+	}
+}
+
+ALyraPlayerController* ALyraPlayerState::GetLyraPlayerController() const
+{
+	return Cast<ALyraPlayerController>(GetOwner());
+}
+
+UAbilitySystemComponent* ALyraPlayerState::GetAbilitySystemComponent() const
+{
+	return GetLyraAbilitySystemComponent();
 }
 
 void ALyraPlayerState::SetPawnData(const ULyraPawnData* InPawnData)
@@ -63,9 +122,58 @@ void ALyraPlayerState::SetPawnData(const ULyraPawnData* InPawnData)
 	// 	}
 	// }
 	//
-	// UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_LyraAbilityReady);
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_LyraAbilityReady);
 	
 	ForceNetUpdate();
+}
+
+void ALyraPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+
+	TInlineComponentArray<UPlayerStateComponent*> PlayerStateComponents;
+	GetComponents(PlayerStateComponents);
+	for (UPlayerStateComponent* SourcePSComp : PlayerStateComponents)
+	{
+		if (UPlayerStateComponent* TargetComp = Cast<UPlayerStateComponent>(static_cast<UObject*>(FindObjectWithOuter(PlayerState, SourcePSComp->GetClass(), SourcePSComp->GetFName()))))
+		{
+			SourcePSComp->CopyProperties(TargetComp);
+		}
+	}
+}
+
+void ALyraPlayerState::OnDeactivated()
+{
+
+	bool bDestroyDeactivatedPlayerState = true;
+
+	// switch (GetPlayerConnectionType())
+	// {
+	// case ELyraPlayerConnectionType::Player:
+	// case ELyraPlayerConnectionType::InactivePlayer:
+	// 	//@TODO: Ask the experience if we should destroy disconnecting players immediately or leave them around
+	// 	// (e.g., for long running servers where they might build up if lots of players cycle through)
+	// 	bDestroyDeactivatedPlayerState = true;
+	// 	break;
+	// default:
+	// 	bDestroyDeactivatedPlayerState = true;
+	// 	break;
+	// }
+	//
+	// SetPlayerConnectionType(ELyraPlayerConnectionType::InactivePlayer);
+
+	if (bDestroyDeactivatedPlayerState)
+	{
+		Destroy();
+	}
+}
+
+void ALyraPlayerState::OnReactivated()
+{
+	// if (GetPlayerConnectionType() == ELyraPlayerConnectionType::InactivePlayer)
+	// {
+	// 	SetPlayerConnectionType(ELyraPlayerConnectionType::Player);
+	//
 }
 
 void ALyraPlayerState::OnExperienceLoaded(const ULyraExperienceDefinition* CurrentExperience)
