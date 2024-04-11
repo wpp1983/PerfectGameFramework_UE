@@ -6,17 +6,35 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
-#include "GameFramework/Character.h"
+#include "ModularCharacter.h"
 #include "LyraCharacter.generated.h"
 
-class ULyraAbilitySystemComponent;
+class AActor;
+class AController;
 class ALyraPlayerController;
 class ALyraPlayerState;
-class ULyraPawnExtensionComponent;
+class FLifetimeProperty;
+class IRepChangedPropertyTracker;
+class UAbilitySystemComponent;
+class UInputComponent;
+class ULyraAbilitySystemComponent;
 class ULyraCameraComponent;
+class ULyraHealthComponent;
+class ULyraPawnExtensionComponent;
+class UObject;
+struct FFrame;
+struct FGameplayTag;
+struct FGameplayTagContainer;
 
-UCLASS()
-class PERFECTGAMEFRAMEWORK_API ALyraCharacter : public ACharacter, public IAbilitySystemInterface
+/**
+ * ALyraCharacter
+ *
+ *	The base character pawn class used by this project.
+ *	Responsible for sending events to pawn components.
+ *	New behavior should be added via pawn components when possible.
+ */
+UCLASS(Config = Game, Meta = (ShortTooltip = "The base character pawn class used by this project."))
+class PERFECTGAMEFRAMEWORK_API ALyraCharacter : public AModularCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -34,11 +52,7 @@ public:
 	ULyraAbilitySystemComponent* GetLyraAbilitySystemComponent() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	//~ Begin AActor Interface
-	virtual void PreInitializeComponents() override;
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	//~ End AActor Interface
+	void ToggleCrouch();
 
 protected:
 

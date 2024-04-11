@@ -5,11 +5,17 @@
 
 #include "LyraPawnExtensionComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/GameFrameworkComponentManager.h"
 #include "PerfectGameFramework/AbilitySystem/LyraAbilitySystemComponent.h"
 #include "PerfectGameFramework/Camera/LyraCameraComponent.h"
 #include "PerfectGameFramework/Player/LyraPlayerController.h"
 #include "PerfectGameFramework/Player/LyraPlayerState.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(LyraCharacter)
+
+class AActor;
+class FLifetimeProperty;
+class IRepChangedPropertyTracker;
+class UInputComponent;
 
 static FName NAME_LyraCharacterCollisionProfile_Capsule(TEXT("LyraPawnCapsule"));
 static FName NAME_LyraCharacterCollisionProfile_Mesh(TEXT("LyraPawnMesh"));
@@ -48,26 +54,6 @@ ALyraCharacter::ALyraCharacter(const FObjectInitializer& ObjectInitializer)
 	CrouchedEyeHeight = 50.0f;
 }
 
-void ALyraCharacter::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
-}
-
-void ALyraCharacter::BeginPlay()
-{
-	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
-	
-	Super::BeginPlay();
-}
-
-void ALyraCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
-	
-	Super::EndPlay(EndPlayReason);
-}
 
 void ALyraCharacter::OnAbilitySystemInitialized()
 {
@@ -142,5 +128,19 @@ UAbilitySystemComponent* ALyraCharacter::GetAbilitySystemComponent() const
 	}
 
 	return PawnExtComponent->GetLyraAbilitySystemComponent();
+}
+
+void ALyraCharacter::ToggleCrouch()
+{
+	// const ULyraCharacterMovementComponent* LyraMoveComp = CastChecked<ULyraCharacterMovementComponent>(GetCharacterMovement());
+	//
+	// if (bIsCrouched || LyraMoveComp->bWantsToCrouch)
+	// {
+	// 	UnCrouch();
+	// }
+	// else if (LyraMoveComp->IsMovingOnGround())
+	// {
+	// 	Crouch();
+	// }
 }
 

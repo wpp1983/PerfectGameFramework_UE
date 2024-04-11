@@ -42,7 +42,11 @@ public class PerfectGameFramework : ModuleRules
 				"GameplayAbilities",
 				"ModularGameplay",
 				"GameplayTasks",
-				"GameplayTags",
+				"GameplayTags", 
+				"EnhancedInput", 
+				"GameplayMessageRuntime", 
+				"CommonGame",
+                "modularGameplayActors",
 				
 				// ... add private dependencies that you statically link with here ...	
 			}

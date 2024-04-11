@@ -3,16 +3,23 @@
 
 #include "LyraHeroComponent.h"
 
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "LyraCharacter.h"
 #include "LyraGameplayTags.h"
 #include "LyraLogChannels.h"
 #include "LyraPawnExtensionComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Misc/UObjectToken.h"
+#include "PerfectGameFramework/AbilitySystem/LyraAbilitySystemComponent.h"
 #include "PerfectGameFramework/Camera/LyraCameraComponent.h"
 #include "PerfectGameFramework/Camera/LyraCameraMode.h"
 #include "PerfectGameFramework/Player/LyraPlayerController.h"
 #include "PerfectGameFramework/Player/LyraPlayerState.h"
 #include "PerfectGameFramework/Character/LyraPawnData.h"
+#include "PerfectGameFramework/Input/LyraInputComponent.h"
+#include "PerfectGameFramework/Player/LyraLocalPlayer.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LyraHeroComponent)
 
@@ -82,6 +89,248 @@ void ULyraHeroComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ULyraHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputComponent)
 {
+	check(PlayerInputComponent);
+
+	const APawn* Pawn = GetPawn<APawn>();
+	if (!Pawn)
+	{
+		return;
+	}
+
+	const APlayerController* PC = GetController<APlayerController>();
+	check(PC);
+
+	const ULyraLocalPlayer* LP = Cast<ULyraLocalPlayer>(PC->GetLocalPlayer());
+	check(LP);
+
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
+
+	Subsystem->ClearAllMappings();
+
+	if (const ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+	{
+		if (const ULyraPawnData* PawnData = PawnExtComp->GetPawnData<ULyraPawnData>())
+		{
+			if (const ULyraInputConfig* InputConfig = PawnData->InputConfig)
+			{
+				for (const FInputMappingContextAndPriority& Mapping : DefaultInputMappings)
+				{
+					if (UInputMappingContext* IMC = Mapping.InputMapping.Get())
+					{
+						if (Mapping.bRegisterWithSettings)
+						{
+							if (UEnhancedInputUserSettings* Settings = Subsystem->GetUserSettings())
+							{
+								Settings->RegisterInputMappingContext(IMC);
+							}
+							
+							FModifyContextOptions Options = {};
+							Options.bIgnoreAllPressedKeysUntilRelease = false;
+							// Actually add the config to the local player							
+							Subsystem->AddMappingContext(IMC, Mapping.Priority, Options);
+						}
+					}
+				}
+
+				// The Lyra Input Component has some additional functions to map Gameplay Tags to an Input Action.
+				// If you want this functionality but still want to change your input component class, make it a subclass
+				// of the ULyraInputComponent or modify this component accordingly.
+				ULyraInputComponent* LyraIC = Cast<ULyraInputComponent>(PlayerInputComponent);
+				if (ensureMsgf(LyraIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to ULyraInputComponent or a subclass of it.")))
+				{
+					// Add the key mappings that may have been set by the player
+					LyraIC->AddInputMappings(InputConfig, Subsystem);
+
+					// This is where we actually bind and input action to a gameplay tag, which means that Gameplay Ability Blueprints will
+					// be triggered directly by these input actions Triggered events. 
+					TArray<uint32> BindHandles;
+					LyraIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ThisClass::Input_LookStick, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ false);
+				}
+			}
+		}
+	}
+
+	if (ensure(!bReadyToBindInputs))
+	{
+		bReadyToBindInputs = true;
+	}
+ 
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(const_cast<APlayerController*>(PC), NAME_BindInputsNow);
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(const_cast<APawn*>(Pawn), NAME_BindInputsNow);
+}
+
+void ULyraHeroComponent::AddAdditionalInputConfig(const ULyraInputConfig* InputConfig)
+{
+	TArray<uint32> BindHandles;
+
+	const APawn* Pawn = GetPawn<APawn>();
+	if (!Pawn)
+	{
+		return;
+	}
+	
+	const APlayerController* PC = GetController<APlayerController>();
+	check(PC);
+
+	const ULocalPlayer* LP = PC->GetLocalPlayer();
+	check(LP);
+
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(Subsystem);
+
+	if (const ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+	{
+		ULyraInputComponent* LyraIC = Pawn->FindComponentByClass<ULyraInputComponent>();
+		if (ensureMsgf(LyraIC, TEXT("Unexpected Input Component class! The Gameplay Abilities will not be bound to their inputs. Change the input component to ULyraInputComponent or a subclass of it.")))
+		{
+			LyraIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
+		}
+	}
+}
+
+void ULyraHeroComponent::RemoveAdditionalInputConfig(const ULyraInputConfig* InputConfig)
+{
+	//@TODO: Implement me!
+}
+
+bool ULyraHeroComponent::IsReadyToBindInputs() const
+{
+	return bReadyToBindInputs;
+}
+
+void ULyraHeroComponent::Input_AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	if (const APawn* Pawn = GetPawn<APawn>())
+	{
+		if (const ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+		{
+			if (ULyraAbilitySystemComponent* LyraASC = PawnExtComp->GetLyraAbilitySystemComponent())
+			{
+				LyraASC->AbilityInputTagPressed(InputTag);
+			}
+		}	
+	}
+}
+
+void ULyraHeroComponent::Input_AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	const APawn* Pawn = GetPawn<APawn>();
+	if (!Pawn)
+	{
+		return;
+	}
+
+	if (const ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(Pawn))
+	{
+		if (ULyraAbilitySystemComponent* LyraASC = PawnExtComp->GetLyraAbilitySystemComponent())
+		{
+			LyraASC->AbilityInputTagReleased(InputTag);
+		}
+	}
+}
+
+void ULyraHeroComponent::Input_Move(const FInputActionValue& InputActionValue)
+{
+	APawn* Pawn = GetPawn<APawn>();
+	AController* Controller = Pawn ? Pawn->GetController() : nullptr;
+
+	// If the player has attempted to move again then cancel auto running
+	// if (ALyraPlayerController* LyraController = Cast<ALyraPlayerController>(Controller))
+	// {
+	// 	LyraController->SetIsAutoRunning(false);
+	// }
+	
+	if (Controller)
+	{
+		const FVector2D Value = InputActionValue.Get<FVector2D>();
+		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+
+		if (Value.X != 0.0f)
+		{
+			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
+			Pawn->AddMovementInput(MovementDirection, Value.X);
+		}
+
+		if (Value.Y != 0.0f)
+		{
+			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
+			Pawn->AddMovementInput(MovementDirection, Value.Y);
+		}
+	}
+}
+
+void ULyraHeroComponent::Input_LookMouse(const FInputActionValue& InputActionValue)
+{
+	APawn* Pawn = GetPawn<APawn>();
+
+	if (!Pawn)
+	{
+		return;
+	}
+	
+	const FVector2D Value = InputActionValue.Get<FVector2D>();
+
+	if (Value.X != 0.0f)
+	{
+		Pawn->AddControllerYawInput(Value.X);
+	}
+
+	if (Value.Y != 0.0f)
+	{
+		Pawn->AddControllerPitchInput(Value.Y);
+	}
+}
+
+void ULyraHeroComponent::Input_LookStick(const FInputActionValue& InputActionValue)
+{
+	APawn* Pawn = GetPawn<APawn>();
+
+	if (!Pawn)
+	{
+		return;
+	}
+	
+	const FVector2D Value = InputActionValue.Get<FVector2D>();
+
+	const UWorld* World = GetWorld();
+	check(World);
+
+	if (Value.X != 0.0f)
+	{
+		Pawn->AddControllerYawInput(Value.X * LyraHero::LookYawRate * World->GetDeltaSeconds());
+	}
+
+	if (Value.Y != 0.0f)
+	{
+		Pawn->AddControllerPitchInput(Value.Y * LyraHero::LookPitchRate * World->GetDeltaSeconds());
+	}
+}
+
+void ULyraHeroComponent::Input_Crouch(const FInputActionValue& InputActionValue)
+{
+	if (ALyraCharacter* Character = GetPawn<ALyraCharacter>())
+	{
+		Character->ToggleCrouch();
+	}
+}
+
+void ULyraHeroComponent::Input_AutoRun(const FInputActionValue& InputActionValue)
+{
+	if (APawn* Pawn = GetPawn<APawn>())
+	{
+		if (ALyraPlayerController* Controller = Cast<ALyraPlayerController>(Pawn->GetController()))
+		{
+			// Toggle auto running
+			// Controller->SetIsAutoRunning(!Controller->GetIsAutoRunning());
+		}	
+	}
 }
 
 TSubclassOf<ULyraCameraMode> ULyraHeroComponent::DetermineCameraMode() const

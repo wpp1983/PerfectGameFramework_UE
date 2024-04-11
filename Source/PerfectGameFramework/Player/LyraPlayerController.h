@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonPlayerController.h"
 #include "GameFramework/PlayerController.h"
 #include "LyraPlayerController.generated.h"
 
@@ -10,7 +11,7 @@
  * 
  */
 UCLASS()
-class PERFECTGAMEFRAMEWORK_API ALyraPlayerController : public APlayerController
+class PERFECTGAMEFRAMEWORK_API ALyraPlayerController : public ACommonPlayerController
 {
 	GENERATED_BODY()
 

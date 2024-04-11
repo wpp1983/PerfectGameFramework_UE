@@ -6,9 +6,12 @@
 #include "GameplayAbilitySpecHandle.h"
 #include "Components/GameFrameworkInitStateInterface.h"
 #include "Components/PawnComponent.h"
+#include "PerfectGameFramework/GameFeatures/GameFeatureAction_AddInputContextMapping.h" 
+
 #include "LyraHeroComponent.generated.h"
 
 
+struct FInputActionValue;
 class ULyraInputConfig;
 class ULyraCameraMode;
 /**
@@ -58,53 +61,40 @@ public:
 	//~ End IGameFrameworkInitStateInterface interface
 
 	
-	protected:
+protected:
     
-    	virtual void OnRegister() override;
-    	virtual void BeginPlay() override;
-    	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    virtual void OnRegister() override;
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     
-    	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
+    virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent);
     
-    	// void Input_AbilityInputTagPressed(FGameplayTag InputTag);
-    	// void Input_AbilityInputTagReleased(FGameplayTag InputTag);
-     //
-    	// void Input_Move(const FInputActionValue& InputActionValue);
-    	// void Input_LookMouse(const FInputActionValue& InputActionValue);
-    	// void Input_LookStick(const FInputActionValue& InputActionValue);
-    	// void Input_Crouch(const FInputActionValue& InputActionValue);
-    	// void Input_AutoRun(const FInputActionValue& InputActionValue);
+    void Input_AbilityInputTagPressed(FGameplayTag InputTag);
+    void Input_AbilityInputTagReleased(FGameplayTag InputTag);
     
-    	TSubclassOf<ULyraCameraMode> DetermineCameraMode() const;
+    void Input_Move(const FInputActionValue& InputActionValue);
+    void Input_LookMouse(const FInputActionValue& InputActionValue);
+    void Input_LookStick(const FInputActionValue& InputActionValue);
+    void Input_Crouch(const FInputActionValue& InputActionValue);
+    void Input_AutoRun(const FInputActionValue& InputActionValue);
+    
+    TSubclassOf<ULyraCameraMode> DetermineCameraMode() const;
     	
-    	// void OnInputConfigActivated(const FLoadedMappableConfigPair& ConfigPair);
-    	// void OnInputConfigDeactivated(const FLoadedMappableConfigPair& ConfigPair);
+    // void OnInputConfigActivated(const FLoadedMappableConfigPair& ConfigPair);
+    // void OnInputConfigDeactivated(const FLoadedMappableConfigPair& ConfigPair);
 
-	protected:
-    
-    	/**
-    	 * Input Configs that should be added to this player when initializing the input. These configs
-    	 * will NOT be registered with the settings because they are added at runtime. If you want the config
-    	 * pair to be in the settings, then add it via the GameFeatureAction_AddInputConfig
-    	 * 
-    	 * NOTE: You should only add to this if you do not have a game feature plugin accessible to you.
-    	 * If you do, then use the GameFeatureAction_AddInputConfig instead. 
-    	 */
-    	// PRAGMA_DISABLE_DEPRECATION_WARNINGS
-    	// UE_DEPRECATED(5.3, "DefaultInputConfigs have been deprecated, use DefaultInputMappings instead")
-    	// TArray<FMappableConfigPair> DefaultInputConfigs;
-    	// PRAGMA_ENABLE_DEPRECATION_WARNINGS
-    	//
-    	// UPROPERTY(EditAnywhere)
-    	// TArray<FInputMappingContextAndPriority> DefaultInputMappings;
+protected:
+	
+    UPROPERTY(EditAnywhere)
+    TArray<FInputMappingContextAndPriority> DefaultInputMappings;
     	
-    	/** Camera mode set by an ability. */
-    	UPROPERTY()
-    	TSubclassOf<ULyraCameraMode> AbilityCameraMode;
+    /** Camera mode set by an ability. */
+    UPROPERTY()
+    TSubclassOf<ULyraCameraMode> AbilityCameraMode;
     
-    	/** Spec handle for the last ability to set a camera mode. */
-    	FGameplayAbilitySpecHandle AbilityCameraModeOwningSpecHandle;
+    /** Spec handle for the last ability to set a camera mode. */
+    FGameplayAbilitySpecHandle AbilityCameraModeOwningSpecHandle;
     
-    	/** True when player input bindings have been applied, will never be true for non - players */
-    	bool bReadyToBindInputs;
+    /** True when player input bindings have been applied, will never be true for non - players */
+    bool bReadyToBindInputs;
 };

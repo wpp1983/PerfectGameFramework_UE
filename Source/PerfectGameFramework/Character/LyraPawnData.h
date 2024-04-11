@@ -42,9 +42,9 @@ public:
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Abilities")
 	// TObjectPtr<ULyraAbilityTagRelationshipMapping> TagRelationshipMapping;
 	//
-	// // Input configuration used by player controlled pawns to create input mappings and bind input actions.
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Input")
-	// TObjectPtr<ULyraInputConfig> InputConfig;
+	// Input configuration used by player controlled pawns to create input mappings and bind input actions.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Input")
+	TObjectPtr<ULyraInputConfig> InputConfig;
 	//
 	// Default camera mode used by player controlled pawns.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Camera")

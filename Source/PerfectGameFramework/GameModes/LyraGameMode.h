@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "ModularGameMode.h"
+
 #include "LyraGameMode.generated.h"
 
 class ULyraExperienceDefinition;
@@ -18,10 +18,12 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLyraGameModePlayerInitialized, AGameMode
 
 
 /**
- * 
+ * ALyraGameMode
+ *
+ *	The base game mode class used by this project.
  */
-UCLASS()
-class PERFECTGAMEFRAMEWORK_API ALyraGameMode : public AGameModeBase
+UCLASS(Config = Game, Meta = (ShortTooltip = "The base game mode class used by this project."))
+class PERFECTGAMEFRAMEWORK_API ALyraGameMode : public AModularGameModeBase
 {
 	GENERATED_BODY()
 

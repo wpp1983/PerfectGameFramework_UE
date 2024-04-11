@@ -28,8 +28,6 @@ ALyraPlayerState::ALyraPlayerState(const FObjectInitializer& ObjectInitializer)
 void ALyraPlayerState::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
-
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 void ALyraPlayerState::PostInitializeComponents()
@@ -52,14 +50,11 @@ void ALyraPlayerState::PostInitializeComponents()
 
 void ALyraPlayerState::BeginPlay()
 {
-	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
-	
 	Super::BeginPlay();
 }
 
 void ALyraPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
 	
 	Super::EndPlay(EndPlayReason);
 }

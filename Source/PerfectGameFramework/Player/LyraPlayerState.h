@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/PlayerState.h"
+#include "ModularPlayerState.h"
 #include "LyraPlayerState.generated.h"
 
 class ULyraAbilitySystemComponent;
@@ -16,7 +16,7 @@ class ULyraPawnData;
  * 
  */
 UCLASS()
-class PERFECTGAMEFRAMEWORK_API ALyraPlayerState : public APlayerState, public IAbilitySystemInterface
+class PERFECTGAMEFRAMEWORK_API ALyraPlayerState : public AModularPlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 

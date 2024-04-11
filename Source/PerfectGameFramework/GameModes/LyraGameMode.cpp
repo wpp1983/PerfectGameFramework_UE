@@ -17,6 +17,8 @@
 #include "PerfectGameFramework/Player/LyraPlayerState.h"
 #include "PerfectGameFramework/System/LyraAssetManager.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(LyraGameMode)
+
 ALyraGameMode::ALyraGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
