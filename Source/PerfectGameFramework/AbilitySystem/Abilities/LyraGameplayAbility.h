@@ -83,10 +83,26 @@ public:
 
 	ULyraGameplayAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
+	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
+	ULyraAbilitySystemComponent* GetLyraAbilitySystemComponentFromActorInfo() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
+	ALyraPlayerController* GetLyraPlayerControllerFromActorInfo() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
+	AController* GetControllerFromActorInfo() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
+	ALyraCharacter* GetLyraCharacterFromActorInfo() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
+	ULyraHeroComponent* GetHeroComponentFromActorInfo() const;
 
 	ELyraAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	ELyraAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }
+
+	void TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
+
 
 	void OnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
 	{

@@ -6,6 +6,10 @@
 #include "AbilitySystemComponent.h"
 #include "LyraAbilitySimpleFailureMessage.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
+#include "PerfectGameFramework/AbilitySystem/LyraAbilitySystemComponent.h"
+#include "PerfectGameFramework/Character/LyraCharacter.h"
+#include "PerfectGameFramework/Character/LyraHeroComponent.h"
+#include "PerfectGameFramework/Player/LyraPlayerController.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_SIMPLE_FAILURE_MESSAGE, "Ability.UserFacingSimpleActivateFail.Message");
 UE_DEFINE_GAMEPLAY_TAG(TAG_ABILITY_PLAY_MONTAGE_FAILURE_MESSAGE, "Ability.PlayMontageOnActivateFail.Message");
@@ -24,6 +28,56 @@ ULyraGameplayAbility::ULyraGameplayAbility(const FObjectInitializer& ObjectIniti
 	bLogCancelation = false;
 
 	ActiveCameraMode = nullptr;
+}
+
+ULyraAbilitySystemComponent* ULyraGameplayAbility::GetLyraAbilitySystemComponentFromActorInfo() const
+{
+	return (CurrentActorInfo ? Cast<ULyraAbilitySystemComponent>(CurrentActorInfo->AbilitySystemComponent.Get()) : nullptr);
+}
+
+ALyraPlayerController* ULyraGameplayAbility::GetLyraPlayerControllerFromActorInfo() const
+{
+	return (CurrentActorInfo ? Cast<ALyraPlayerController>(CurrentActorInfo->PlayerController.Get()) : nullptr);
+}
+
+AController* ULyraGameplayAbility::GetControllerFromActorInfo() const
+{
+	if (CurrentActorInfo)
+	{
+		if (AController* PC = CurrentActorInfo->PlayerController.Get())
+		{
+			return PC;
+		}
+
+		// Look for a player controller or pawn in the owner chain.
+		AActor* TestActor = CurrentActorInfo->OwnerActor.Get();
+		while (TestActor)
+		{
+			if (AController* C = Cast<AController>(TestActor))
+			{
+				return C;
+			}
+
+			if (APawn* Pawn = Cast<APawn>(TestActor))
+			{
+				return Pawn->GetController();
+			}
+
+			TestActor = TestActor->GetOwner();
+		}
+	}
+
+	return nullptr;
+}
+
+ALyraCharacter* ULyraGameplayAbility::GetLyraCharacterFromActorInfo() const
+{
+	return (CurrentActorInfo ? Cast<ALyraCharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr);
+}
+
+ULyraHeroComponent* ULyraGameplayAbility::GetHeroComponentFromActorInfo() const
+{
+	return (CurrentActorInfo ? ULyraHeroComponent::FindHeroComponent(CurrentActorInfo->AvatarActor.Get()) : nullptr);
 }
 
 void ULyraGameplayAbility::TryActivateAbilityOnSpawn(const FGameplayAbilityActorInfo* ActorInfo,

@@ -13,7 +13,7 @@ public class PerfectGameFramework : ModuleRules
 				// ... add public include paths required here ...
 			}
 			);
-				
+		
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
@@ -27,6 +27,7 @@ public class PerfectGameFramework : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
+				"UIExtension",
 			}
 			);
 			
@@ -38,15 +39,31 @@ public class PerfectGameFramework : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore", 
+				"PhysicsCore",
 				"GameFeatures", 
 				"GameplayAbilities",
 				"ModularGameplay",
+				"DeveloperSettings",
 				"GameplayTasks",
 				"GameplayTags", 
-				"EnhancedInput", 
+				"EnhancedInput",
+				"AIModule",
 				"GameplayMessageRuntime", 
 				"CommonGame",
-                "modularGameplayActors",
+                "ModularGameplayActors",
+                "Niagara",
+                "NetCore", 
+                "SignificanceManager",
+                "CommonUI",
+                "EngineSettings",
+                "UMG",
+                "AsyncMixin",
+                "ControlFlows",
+                "CommonUser",
+                "CommonInput",
+                "InputCore",
+                "AudioModulation",
+
 				
 				// ... add private dependencies that you statically link with here ...	
 			}
@@ -59,5 +76,8 @@ public class PerfectGameFramework : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
+		
+		SetupGameplayDebuggerSupport(Target);
+		SetupIrisSupport(Target);
 	}
 }

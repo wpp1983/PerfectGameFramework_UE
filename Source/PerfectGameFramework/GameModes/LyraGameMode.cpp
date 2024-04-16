@@ -16,6 +16,7 @@
 #include "PerfectGameFramework/Player/LyraPlayerSpawningManagerComponent.h"
 #include "PerfectGameFramework/Player/LyraPlayerState.h"
 #include "PerfectGameFramework/System/LyraAssetManager.h"
+#include "PerfectGameFramework/UI/LyraHUD.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LyraGameMode)
 
@@ -28,7 +29,7 @@ ALyraGameMode::ALyraGameMode(const FObjectInitializer& ObjectInitializer)
 	// ReplaySpectatorPlayerControllerClass = ALyraReplayPlayerController::StaticClass();
 	PlayerStateClass = ALyraPlayerState::StaticClass();
 	DefaultPawnClass = ALyraCharacter::StaticClass();
-	// HUDClass = ALyraHUD::StaticClass();
+	HUDClass = ALyraHUD::StaticClass();
 }
 
 const ULyraPawnData* ALyraGameMode::GetPawnDataForController(const AController* InController) const

@@ -49,6 +49,26 @@
 		{
 			"Name": "ModularGameplayActors",
 			"Enabled": true
+		},
+		{
+			"Name": "UIExtension",
+			"Enabled": true
+		},
+		{
+			"Name": "SignificanceManager",
+			"Enabled": true
+		},
+		{
+			"Name": "AsyncMixin",
+			"Enabled": true
+		},
+		{
+			"Name": "ControlFlows",
+			"Enabled": true
 		}
+		
+		
+		
+		
 	]
 }
