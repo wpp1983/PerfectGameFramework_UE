@@ -15,6 +15,6 @@ class UInventoryFragment_ReticleConfig : public ULyraInventoryItemFragment
 	GENERATED_BODY()
 
 public:
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Reticle)
-	// TArray<TSubclassOf<ULyraReticleWidgetBase>> ReticleWidgets;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Reticle)
+	TArray<TSubclassOf<ULyraReticleWidgetBase>> ReticleWidgets;
 };
