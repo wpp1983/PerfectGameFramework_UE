@@ -23,4 +23,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "LyraGameStateComponent", meta = (DisplayName = "On Experience Loaded"))
 	void OnExperienceLoaded(const ULyraExperienceDefinition* Experience);
+
+	virtual void OnExperienceLoaded_Implementation(const ULyraExperienceDefinition* Experience);
 };

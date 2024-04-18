@@ -27,7 +27,9 @@ public class PerfectGameFramework : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-				"UIExtension",
+                "ModularGameplay",
+                "UIExtension",
+
 			}
 			);
 			
@@ -42,12 +44,10 @@ public class PerfectGameFramework : ModuleRules
 				"PhysicsCore",
 				"GameFeatures", 
 				"GameplayAbilities",
-				"ModularGameplay",
 				"DeveloperSettings",
 				"GameplayTasks",
 				"GameplayTags", 
 				"EnhancedInput",
-				"AIModule",
 				"GameplayMessageRuntime", 
 				"CommonGame",
                 "ModularGameplayActors",
@@ -63,7 +63,7 @@ public class PerfectGameFramework : ModuleRules
                 "CommonInput",
                 "InputCore",
                 "AudioModulation",
-
+                "AIModule",
 				
 				// ... add private dependencies that you statically link with here ...	
 			}
