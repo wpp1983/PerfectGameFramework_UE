@@ -27,6 +27,8 @@ class FLifetimeProperty;
 
 const FName ALyraPlayerState::NAME_LyraAbilityReady("LyraAbilitiesReady");
 
+
+
 ALyraPlayerState::ALyraPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, MyPlayerConnectionType(ELyraPlayerConnectionType::Player)

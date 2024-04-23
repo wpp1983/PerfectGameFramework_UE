@@ -144,7 +144,7 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_PawnData)
 	TObjectPtr<const ULyraPawnData> PawnData;
 
-private:
+protected:
 
 	// The ability system component sub-object used by player characters.
 	UPROPERTY(VisibleAnywhere, Category = "Lyra|PlayerState")
