@@ -3,9 +3,12 @@
 #include "LyraMonsterController.h"
 
 #include "LyraLogChannels.h"
+#include "Components/GameFrameworkComponentManager.h"
+#include "PerfectGameFramework/AbilitySystem/LyraAbilitySet.h"
 #include "PerfectGameFramework/AbilitySystem/LyraAbilitySystemComponent.h"
 #include "PerfectGameFramework/AbilitySystem/Attributes/LyraCombatSet.h"
 #include "PerfectGameFramework/AbilitySystem/Attributes/LyraHealthSet.h"
+#include "PerfectGameFramework/Character/LyraPawnData.h"
 
 // Sets default values
 ALyraMonsterController::ALyraMonsterController(const FObjectInitializer& ObjectInitializer)
@@ -58,3 +61,25 @@ FOnLyraTeamIndexChangedDelegate* ALyraMonsterController::GetOnTeamIndexChangedDe
 {
 	return &OnTeamChangedDelegate;
 }
+
+void ALyraMonsterController::SetPawnData(const ULyraPawnData* InPawnData)
+{
+	check(InPawnData);
+
+	if (PawnData)
+	{
+		UE_LOG(LogLyra, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
+		return;
+	}
+	PawnData = InPawnData;
+
+	for (const ULyraAbilitySet* AbilitySet : PawnData->AbilitySets)
+	{
+		if (AbilitySet)
+		{
+			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr);
+		}
+	}
+}
+
+

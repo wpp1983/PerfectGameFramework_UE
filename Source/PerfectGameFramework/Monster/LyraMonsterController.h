@@ -5,6 +5,8 @@
 #include "PerfectGameFramework/Teams/LyraTeamAgentInterface.h"
 #include "LyraMonsterController.generated.h"
 
+class ULyraPawnData;
+class ULyraAbilitySet;
 class UAbilitySystemComponent;
 class ULyraAbilitySystemComponent;
 
@@ -32,6 +34,8 @@ public:
 	virtual FOnLyraTeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
 	//~End of ILyraTeamAgentInterface interface
 
+
+	void SetPawnData(const ULyraPawnData* InPawnData);
 	
 	// The ability system component sub-object used by player characters.
 	UPROPERTY(VisibleAnywhere, Category = "Lyra|MonsterController")
@@ -50,4 +54,6 @@ public:
 	UPROPERTY()
 	FGenericTeamId MyTeamID;
 
+	UPROPERTY()
+	TObjectPtr<const ULyraPawnData> PawnData;
 };
