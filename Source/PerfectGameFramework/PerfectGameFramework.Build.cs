@@ -64,6 +64,7 @@ public class PerfectGameFramework : ModuleRules
                 "InputCore",
                 "AudioModulation",
                 "AIModule",
+                "TargetingSystem"
 				
 				// ... add private dependencies that you statically link with here ...	
 			}

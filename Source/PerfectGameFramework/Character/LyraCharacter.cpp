@@ -80,43 +80,6 @@ ALyraCharacter::ALyraCharacter(const FObjectInitializer& ObjectInitializer)
 	CrouchedEyeHeight = 50.0f;
 }
 
-void ALyraCharacter::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-}
-
-void ALyraCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	UWorld* World = GetWorld();
-
-	const bool bRegisterWithSignificanceManager = !IsNetMode(NM_DedicatedServer);
-	if (bRegisterWithSignificanceManager)
-	{
-		if (ULyraSignificanceManager* SignificanceManager = USignificanceManager::Get<ULyraSignificanceManager>(World))
-		{
-//@TODO: SignificanceManager->RegisterObject(this, (EFortSignificanceType)SignificanceType);
-		}
-	}
-}
-
-void ALyraCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-
-	UWorld* World = GetWorld();
-
-	const bool bRegisterWithSignificanceManager = !IsNetMode(NM_DedicatedServer);
-	if (bRegisterWithSignificanceManager)
-	{
-		if (ULyraSignificanceManager* SignificanceManager = USignificanceManager::Get<ULyraSignificanceManager>(World))
-		{
-			SignificanceManager->UnregisterObject(this);
-		}
-	}
-}
-
 void ALyraCharacter::Reset()
 {
 	DisableMovementAndCollision();
@@ -134,23 +97,7 @@ void ALyraCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 	DOREPLIFETIME(ThisClass, MyTeamID)
 }
 
-void ALyraCharacter::PreReplication(IRepChangedPropertyTracker& ChangedPropertyTracker)
-{
-	Super::PreReplication(ChangedPropertyTracker);
 
-	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-	{
-		// Compress Acceleration: XY components as direction + magnitude, Z component as direct value
-		const double MaxAccel = MovementComponent->MaxAcceleration;
-		const FVector CurrentAccel = MovementComponent->GetCurrentAcceleration();
-		double AccelXYRadians, AccelXYMagnitude;
-		FMath::CartesianToPolar(CurrentAccel.X, CurrentAccel.Y, AccelXYMagnitude, AccelXYRadians);
-
-		ReplicatedAcceleration.AccelXYRadians   = FMath::FloorToInt((AccelXYRadians / TWO_PI) * 255.0);     // [0, 2PI] -> [0, 255]
-		ReplicatedAcceleration.AccelXYMagnitude = FMath::FloorToInt((AccelXYMagnitude / MaxAccel) * 255.0);	// [0, MaxAccel] -> [0, 255]
-		ReplicatedAcceleration.AccelZ           = FMath::FloorToInt((CurrentAccel.Z / MaxAccel) * 127.0);   // [-MaxAccel, MaxAccel] -> [-127, 127]
-	}
-}
 
 void ALyraCharacter::NotifyControllerChanged()
 {
