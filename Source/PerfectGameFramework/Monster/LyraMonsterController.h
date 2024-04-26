@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "ModularAIController.h"
 #include "PerfectGameFramework/Teams/LyraTeamAgentInterface.h"
 #include "LyraMonsterController.generated.h"
@@ -11,7 +12,7 @@ class UAbilitySystemComponent;
 class ULyraAbilitySystemComponent;
 
 UCLASS()
-class PERFECTGAMEFRAMEWORK_API ALyraMonsterController : public AModularAIController, public ILyraTeamAgentInterface
+class PERFECTGAMEFRAMEWORK_API ALyraMonsterController : public AModularAIController, public ILyraTeamAgentInterface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -27,7 +28,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Lyra|MonsterController")
 	ULyraAbilitySystemComponent* GetLyraAbilitySystemComponent() const { return AbilitySystemComponent; }
-
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
 	//~ILyraTeamAgentInterface interface
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;

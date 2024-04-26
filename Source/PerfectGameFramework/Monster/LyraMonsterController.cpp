@@ -36,6 +36,11 @@ void ALyraMonsterController::PostInitializeComponents()
 	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
 }
 
+UAbilitySystemComponent* ALyraMonsterController::GetAbilitySystemComponent() const
+{
+	return GetLyraAbilitySystemComponent();
+}
+
 void ALyraMonsterController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	if (HasAuthority())
